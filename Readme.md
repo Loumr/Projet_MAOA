@@ -2,8 +2,8 @@
 # Problème de métro circulaire
 
 ### Binôme:
-Lou Moulin-Roussel
-Maxence Maire
+Lou Moulin-Roussel<br />
+Maxence Maire<br />
 
 ### Méthode:
 1. Choisir l'ensemble de villes où l'on va mettre des stations
