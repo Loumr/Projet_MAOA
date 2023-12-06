@@ -62,4 +62,25 @@ L'évalutation d'une solution se fait en n².
 <br />
 <br />
 
+### Formulations PLNE
+- Formulation PLNE compacte => P-Median puis TSP Concorde
+- Formulation PLNE non compacte => P-Median (cluster) puis TSP Généralisé
+
 > PL Formulation non compacte = nombre exponentiel de contraintes et de variables
+
+## TO-DO LIST
+
+### Fait
+
+### En cours
+- Lou : Formulation Compacte (P Median + TSP Concorde) => méthodes exactes
+- Maxence : Visualisation des données <br />
+
+### A faire
+- Comparaison des résultats (temps de calcul, complexité, qualité des solutions)
+- Récupérer l'évaluation du prof (temps de trajets moyens)
+- Tester automatiquement sur des instances
+- Heuristique
+- Méta-Heuristique
+- Formulation non compacte (k-partition + TSP Généralisé) => méthodes exactes
+- Mini-rapport (3 pages)
