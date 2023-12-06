@@ -22,12 +22,12 @@ Maxence Maire<br />
 
 ### A FAIRE
 - ALGO GENERAL
-&ensp;Choix des villes          <<<<<>>>>><br />
+&ensp;Choix des villes<br />
 &ensp;Itération  => uniquement pour la méta heuristique<br />
 &ensp;&ensp;Voyageur de commerce<br />
 &ensp;&ensp;Evaluation<br />
 &ensp;&ensp;Changement d'une station<br />
-&ensp;Voyageur de commerce      <<<<<>>>>>><br />
+&ensp;Voyageur de commerce<br />
 
 - Visualisation des données + Comparaison des résultats
 
