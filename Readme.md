@@ -33,7 +33,7 @@ Maxence Maire<br />
 - Visualisation des données + Comparaison des résultats
 - Heuristique:
 &ensp;évaluation d'une solution
-- Méta heuristique cf Critères
+- Méta heuristique cf Critères<br />
 &ensp;algo de choix des stations => Heuristique randomisée répétée du problème du médian<br />
 &ensp;algo de changement de station => cf Changement de station<br />
 &ensp;voyageur de commerce heuristique => cf Heuristique du proche voisin<br />
