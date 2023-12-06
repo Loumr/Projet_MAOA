@@ -21,28 +21,31 @@ Maxence Maire<br />
 <br />
 
 ### A FAIRE
-ALGO GENERAL<br />
+- ALGO GENERAL
 &ensp;Choix des villes          <<<<<>>>>><br />
 &ensp;Itération  => uniquement pour la méta heuristique<br />
 &ensp;&ensp;Voyageur de commerce<br />
 &ensp;&ensp;Evaluation<br />
 &ensp;&ensp;Changement d'une station<br />
 &ensp;Voyageur de commerce      <<<<<>>>>>><br />
-<br />
-Visualisation des données + Comparaison des résultats<br />
-<br />
-Heuristique:<br />
-&ensp;évaluation d'une solution<br />
-<br />
-Méta heuristique<br />
-&ensp;algo de choix des stations<br />
-&ensp;algo de changement de station<br />
-&ensp;voyageur de commerce heuristique<br />
-&ensp;voyageur de commerce avancé<br />
-<br />
-Formulation compact<br />
-<br />
-Formulation non-compacte<br />
-<br />
-Mini-rapport + Analyse critique<br />
 
+- Visualisation des données + Comparaison des résultats
+
+- Heuristique:
+&ensp;évaluation d'une solution
+
+- Méta heuristique
+&ensp;algo de choix des stations
+&ensp;algo de changement de station
+&ensp;voyageur de commerce heuristique
+&ensp;voyageur de commerce avancé
+- Formulation compact
+- Formulation non-compacte
+- Mini-rapport + Analyse critique
+
+
+### Critères:
+- Coût de construction du métro (nombre de stations et longueur des tronçons)
+- Temps de trajets moyen d'une ville à une autre
+- Ration moyen entre marche à pied et trajet en métro
+> L'évalutation d'une solution se fait en n².
