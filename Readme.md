@@ -28,24 +28,30 @@ Maxence Maire<br />
 &ensp;&ensp;Evaluation<br />
 &ensp;&ensp;Changement d'une station<br />
 &ensp;Voyageur de commerce<br />
-
 - Visualisation des données + Comparaison des résultats
-
 - Heuristique:
 &ensp;évaluation d'une solution
-
-- Méta heuristique
-&ensp;algo de choix des stations
-&ensp;algo de changement de station
-&ensp;voyageur de commerce heuristique
-&ensp;voyageur de commerce avancé
+- Méta heuristique cf Critères
+&ensp;algo de choix des stations => Heuristique randomisée répétée du problème du médian
+&ensp;algo de changement de station => cf Changement de station
+&ensp;voyageur de commerce heuristique => cf Heuristique du proche voisin
+&ensp;voyageur de commerce avancé => résolution exacte (Gurobi/CPlex)
 - Formulation compact
 - Formulation non-compacte
 - Mini-rapport + Analyse critique
 
+### Changement de station
+Générer X (100?) nouvelles configurations à partir des paramètres suivants:
+- meilleure station 20% des configurations
+- pire station 20% des configurations
+- stations aléatoire 60% des configurations
 
 ### Critères:
 - Coût de construction du métro (nombre de stations et longueur des tronçons)
 - Temps de trajets moyen d'une ville à une autre
 - Ration moyen entre marche à pied et trajet en métro<br />
 L'évalutation d'une solution se fait en n².
+<br />
+<br />
+
+> PL Formulation non compacte = nombre exponentiel de contraintes et de variables
