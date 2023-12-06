@@ -1,6 +1,8 @@
 
 # Problème de métro circulaire
 
+### Projet: http://www-desir.lip6.fr/~fouilhoux/MAOA/Files/Projet_MAOA_Metro_Circulaire.pdf
+
 ### Binôme:
 Lou Moulin-Roussel<br />
 Maxence Maire<br />
