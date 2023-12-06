@@ -48,4 +48,4 @@ Maxence Maire<br />
 - Coût de construction du métro (nombre de stations et longueur des tronçons)
 - Temps de trajets moyen d'une ville à une autre
 - Ration moyen entre marche à pied et trajet en métro
-> L'évalutation d'une solution se fait en n².
+L'évalutation d'une solution se fait en n².
