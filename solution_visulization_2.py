@@ -6,16 +6,15 @@ import matplotlib.pyplot as plt
 
 
 # A 2d-array positions of shape (n_points, n_dimension) 
-"""
-[[  4.17022005e-01   7.20324493e-01]
+
+positions = [[  4.17022005e-01   7.20324493e-01]
  [  1.14374817e-04   3.02332573e-01]
  [  1.46755891e-01   9.23385948e-02]
  [  1.86260211e-01   3.45560727e-01]
  [  3.96767474e-01   5.38816734e-01]]
-"""
+
 # A 2d-array x_sol which is our MIP-solution marking ~1 when node x is followed by y in our solution-tour, like:
-"""
-[[  0.00000000e+00   1.00000000e+00  -3.01195977e-11   2.00760084e-11
+x_sol = [[  0.00000000e+00   1.00000000e+00  -3.01195977e-11   2.00760084e-11
     2.41495095e-11]
  [ -2.32741108e-11   1.00000000e+00   1.00000000e+00   5.31351363e-12
    -6.12644932e-12]
@@ -25,7 +24,7 @@ import matplotlib.pyplot as plt
     1.00000000e+00]
  [  1.00000000e+00  -2.65096995e-11   3.55630808e-12   7.24755899e-12
     1.00000000e+00]]
-"""
+
 
 fig, ax = plt.subplots(2, sharex=True, sharey=True)         # Prepare 2 plots
 ax[0].set_title('Raw nodes')
