@@ -22,9 +22,6 @@ def parse_instance(file_path):
 
     return instance
 
-def display_instance():
-    pass
-
 def parse_solution(file_path):
     file = open(file_path, 'r')
     Lines = file.readlines()
@@ -64,8 +61,6 @@ def plotTSP(paths, points):
         y.append(y_p) 
     plt.plot(x, y, 'co')
 
-    # Set a scale for the arrow heads
-    a_scale = float(max(x))/float(100)
     k = len(paths)-1
     while k>= 0:
         path = paths[k]
@@ -73,12 +68,16 @@ def plotTSP(paths, points):
         for i in range(0,len(path)-1):
             print("it:" + str(i) + ", point:" + str(path[i]) + ", next_point:" + str(path[i+1]))
             plt.arrow(x[path[i]-1], y[path[i]-1], (x[path[i+1]-1] - x[path[i]-1]), (y[path[i+1]-1] - y[path[i]-1]), 
-                      head_width = a_scale, color = 'g', length_includes_head = True)
+                      head_width = 0, color = 'g', length_includes_head = True)
+        plt.arrow(x[path[len(path)-1]-1], y[path[len(path)-1]-1], (x[path[0]-1] - x[path[len(path)-1]-1]), 
+                  (y[path[0]-1] - y[path[len(path)-1]-1]), head_width = 0, color = 'g', length_includes_head = True)
         k -= 1
 
     #Set axis too slitghtly larger than the set of x and y
-    plt.xlim(0, max(x)*1.1)
-    plt.ylim(0, max(y)*1.1)
+    s_x = 1   #abs(max(x)) - abs(min(x)) * 0.0001
+    s_y = 1   #abs(max(y)) - abs(min(y)) * 0.0001
+    plt.xlim(min(x) - s_x, max(x) + s_x)
+    plt.ylim(min(y) - s_y, max(y) + s_y)
     plt.show()
 
 ##################################################
