@@ -1,5 +1,5 @@
-import pandas
 import matplotlib.pyplot as plt
+# import pandas
 
 def parse_instance(file_path):
     file = open(file_path, 'r')
