@@ -1,5 +1,15 @@
 import matplotlib.pyplot as plt
-# import pandas
+
+
+def evaluate_solution():
+    pass 
+# critère du ratio temps métro/temps à pieds
+# critère de temps moyen
+# => budget max fixé
+
+def compare_solutions():
+    pass
+# maybe with pandas
 
 def parse_instance(file_path):
     file = open(file_path, 'r')
@@ -64,9 +74,7 @@ def plotTSP(paths, points):
     k = len(paths)-1
     while k>= 0:
         path = paths[k]
-        print("len x=" + str(len(x)) + ", len y= " + str(len(y)) + ", len path=" + str(len(path)))
         for i in range(0,len(path)-1):
-            print("it:" + str(i) + ", point:" + str(path[i]) + ", next_point:" + str(path[i+1]))
             plt.arrow(x[path[i]-1], y[path[i]-1], (x[path[i+1]-1] - x[path[i]-1]), (y[path[i+1]-1] - y[path[i]-1]), 
                       head_width = 0, color = 'g', length_includes_head = True)
         plt.arrow(x[path[len(path)-1]-1], y[path[len(path)-1]-1], (x[path[0]-1] - x[path[len(path)-1]-1]), 
@@ -82,9 +90,9 @@ def plotTSP(paths, points):
 
 ##################################################
 ##################################################
+# EXAMPLE:
 
 if __name__ == '__main__':
-    # Run an example
     instance = parse_instance("instances/ulysses16.tsp")
     solution = parse_solution("instances/ulysses16.opt.tour")
     print("Instance:")
