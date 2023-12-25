@@ -93,8 +93,8 @@ def plotTSP(paths, points):
 # EXAMPLE:
 
 if __name__ == '__main__':
-    instance = parse_instance("instances/ulysses16.tsp")
-    solution = parse_solution("instances/ulysses16.opt.tour")
+    instance = parse_instance("instances/ts225.tsp")
+    solution = parse_solution("instances/tsp225.opt.tour")
     print("Instance:")
     print(instance)
     print("Solution:")
