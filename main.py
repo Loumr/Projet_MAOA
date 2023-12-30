@@ -13,6 +13,8 @@ heuristic_sol = []
 for i in range(1):
     heuristic_sol.append(solve_heuristic(instance, int(len(instance)/3)))
 
+print("solution:", evaluate_solution(heuristic_sol[0], instance))
+
 #print("instance =", instance)
 #print("heuristic_sol =", heuristic_sol)
 
