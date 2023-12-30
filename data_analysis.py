@@ -1,12 +1,5 @@
 import matplotlib.pyplot as plt
 
-
-def evaluate_solution():
-    pass 
-# critère du ratio temps métro/temps à pieds
-# critère de temps moyen
-# => budget max fixé
-
 def compare_solutions():
     pass
 # maybe with pandas
