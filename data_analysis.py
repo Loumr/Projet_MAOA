@@ -32,7 +32,7 @@ def parse_instance(file_path):
 
     return instance
 
-def parse_solution(file_path):
+def parse_solution(file_path, points):
     file = open(file_path, 'r')
     Lines = file.readlines()
     file.close()
@@ -50,7 +50,7 @@ def parse_solution(file_path):
                 if int(p) == -1:
                     break
                 else:
-                    solution.append(int(p))
+                    solution.append(points[int(p)-1])
 
     return solution
 
@@ -62,6 +62,7 @@ def plotTSP(paths, points):
     paths: List of lists with the different orders in which the nodes are visited
     points: coordinates for the different nodes
     """
+    colors = ['k', 'g', 'r', 'b', 'c', 'm']
 
     x = []
     y = []
@@ -72,18 +73,25 @@ def plotTSP(paths, points):
     plt.plot(x, y, 'co')
 
     k = len(paths)-1
+    col = 0
     while k>= 0:
         path = paths[k]
-        for i in range(0,len(path)-1):
-            plt.arrow(x[path[i]-1], y[path[i]-1], (x[path[i+1]-1] - x[path[i]-1]), (y[path[i+1]-1] - y[path[i]-1]), 
-                      head_width = 0, color = 'g', length_includes_head = True)
-        plt.arrow(x[path[len(path)-1]-1], y[path[len(path)-1]-1], (x[path[0]-1] - x[path[len(path)-1]-1]), 
-                  (y[path[0]-1] - y[path[len(path)-1]-1]), head_width = 0, color = 'g', length_includes_head = True)
+        startx, starty = path[len(path)-1]
+        endx = (0, 0)
+        endy = (0, 0)
+        for i in range(0,len(path)):
+            endx, endy = path[i]
+            plt.arrow(startx, starty, endx - startx, endy - starty,
+                    head_width = 0, color = colors[col%len(colors)], length_includes_head = True)
+            startx = endx
+            starty = endy
+        #plt.arrow(startx, starty, endx - startx, endy - starty,
+        #        head_width = 0, color = colors[col%len(colors)], length_includes_head = True)
         k -= 1
+        col += 1
 
-    #Set axis too slitghtly larger than the set of x and y
-    s_x = 1   #abs(max(x)) - abs(min(x)) * 0.0001
-    s_y = 1   #abs(max(y)) - abs(min(y)) * 0.0001
+    s_x = 1
+    s_y = 1
     plt.xlim(min(x) - s_x, max(x) + s_x)
     plt.ylim(min(y) - s_y, max(y) + s_y)
     plt.show()
@@ -94,7 +102,7 @@ def plotTSP(paths, points):
 
 if __name__ == '__main__':
     instance = parse_instance("instances/ts225.tsp")
-    solution = parse_solution("instances/tsp225.opt.tour")
+    solution = parse_solution("instances/tsp225.opt.tour", instance)
     print("Instance:")
     print(instance)
     print("Solution:")
