@@ -12,10 +12,13 @@ def solve_heuristic(points, number_of_stations, iterations=1000, nb_children=5, 
     solutions.append(heuristic_TSP(station_points))
     best_solution = None
 
-    for _ in range(iterations):
+    for iter in range(iterations):
+        if iter%50 == 0:
+            print("iteration ", iter)
         sorted_solutions = rank_solutions(solutions, points)
         if best_solution == None or solution_value(sorted_solutions[0]) < solution_value(best_solution):
             best_solution = sorted_solutions[0]
+            print("best value:", solution_value(best_solution), " at iteration ", iter)
         solutions = []
         for i in range(nb_parents):
             if i >= len(sorted_solutions):
@@ -25,15 +28,8 @@ def solve_heuristic(points, number_of_stations, iterations=1000, nb_children=5, 
     
     return best_solution
 
-def create_children_solution(solution):
-    path, sol_dict = solution
-    # if rand < x: change worst station
-    # if rand < y: change best station
-    # else       : change random station
-    
-
-def generate_child_solution(solution, points, number_of_possible_points=3):
-    path, sol_dict = solution
+def generate_child_solution(solution_comp, points, number_of_possible_points=10):
+    solution, sol_dict = solution_comp
     point_to_replace = random.choice(solution)
     
     nearby_points = [point for point in points if point not in solution]
@@ -50,7 +46,6 @@ def solution_value(item):
     solution, s_dict = item
     avg_time = s_dict["average_time"]
     foot_metro_ratio = s_dict["average_metro_dist"] / (s_dict["average_foot_dist"]*10.0)
-    print("avg_time :", avg_time, " ; foot_metro_ratio * 1000.0 :", foot_metro_ratio * 1000.0)
     return (avg_time + foot_metro_ratio * 1000.0)
 
 def rank_solutions(solutions, points):
@@ -60,18 +55,6 @@ def rank_solutions(solutions, points):
         solution_dicts.append( (s, s_dict) )
     sorted_solutions = sorted(solution_dicts, key=solution_value)
     return sorted_solutions
-    
-#        "average_time" : average_time,
-#        "worst_station" : worst_station,
-#        "best_station" : best_station,
-#        "average_foot_dist" : average_foot_dist,
-#        "average_metro_dist" : average_metro_dist
-
-def change_station():
-    pass
-
-def local_search():
-    pass
 
 def calculate_total_distance(config, points):
     total_distance = 0
@@ -95,7 +78,9 @@ def choose_stations(points, number_of_stations, nb_of_iterations = 10000):
     return best_config
 
 def calculate_distance(point1, point2):
-    return math.sqrt((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2)
+    p1x, p1y = point1
+    p2x, p2y = point2
+    return math.sqrt((p1x - p2x)**2 + (p1y - p2y)**2)
 
 def total_distance(tour, points):
     distance = 0
