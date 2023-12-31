@@ -3,13 +3,75 @@ import math
 import random
 from scipy.optimize import minimize
 
-def solve_heuristic(points, number_of_stations):
+def solve_heuristic(points, number_of_stations, iterations=1000, nb_children=5, nb_parents=4):
     stations = choose_stations(points, number_of_stations)
     station_points = []
     for s in stations:
-        station_points.append(points[s])    
-    tsp = heuristic_TSP(station_points)
-    return tsp
+        station_points.append(points[s])
+    solutions = []
+    solutions.append(heuristic_TSP(station_points))
+    best_solution = None
+
+    for _ in range(iterations):
+        sorted_solutions = rank_solutions(solutions, points)
+        if best_solution == None or solution_value(sorted_solutions[0]) < solution_value(best_solution):
+            best_solution = sorted_solutions[0]
+        solutions = []
+        for i in range(nb_parents):
+            if i >= len(sorted_solutions):
+                break
+            for j in range(nb_children):
+                solutions.append(generate_child_solution(sorted_solutions[i], points))
+    
+    return best_solution
+
+def create_children_solution(solution):
+    path, sol_dict = solution
+    # if rand < x: change worst station
+    # if rand < y: change best station
+    # else       : change random station
+    
+
+def generate_child_solution(solution, points, number_of_possible_points=3):
+    path, sol_dict = solution
+    point_to_replace = random.choice(solution)
+    
+    nearby_points = [point for point in points if point not in solution]
+    distances = [(point, calculate_distance(point_to_replace, point)) for point in nearby_points]
+    
+    sorted_distances = sorted(distances, key=lambda x: x[1])
+    closest_points = [point for point, _ in sorted_distances[:number_of_possible_points]]
+    new_point = random.choice(closest_points)
+
+    child_solution = [new_point if point == point_to_replace else point for point in solution]
+    return child_solution
+
+def solution_value(item):
+    solution, s_dict = item
+    avg_time = s_dict["average_time"]
+    foot_metro_ratio = s_dict["average_metro_dist"] / (s_dict["average_foot_dist"]*10.0)
+    print("avg_time :", avg_time, " ; foot_metro_ratio * 1000.0 :", foot_metro_ratio * 1000.0)
+    return (avg_time + foot_metro_ratio * 1000.0)
+
+def rank_solutions(solutions, points):
+    solution_dicts = []
+    for s in solutions:
+        s_dict = evaluate_solution(s, points)
+        solution_dicts.append( (s, s_dict) )
+    sorted_solutions = sorted(solution_dicts, key=solution_value)
+    return sorted_solutions
+    
+#        "average_time" : average_time,
+#        "worst_station" : worst_station,
+#        "best_station" : best_station,
+#        "average_foot_dist" : average_foot_dist,
+#        "average_metro_dist" : average_metro_dist
+
+def change_station():
+    pass
+
+def local_search():
+    pass
 
 def calculate_total_distance(config, points):
     total_distance = 0
@@ -169,10 +231,5 @@ def evaluate_solution(solution, points):
         "average_metro_dist" : average_metro_dist 
     }
 
-def change_station():
-    pass
-
-def local_search():
-    pass
 
 

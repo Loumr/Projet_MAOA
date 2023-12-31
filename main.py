@@ -20,4 +20,3 @@ print("solution:", evaluate_solution(heuristic_sol[0], instance))
 
 plotTSP(heuristic_sol, instance)
 
-

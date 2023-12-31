@@ -7,6 +7,10 @@
 Lou Moulin-Roussel<br />
 Maxence Maire<br />
 
+### Fonctionnement
+Pour lancer l'algorithme, ouvrir le terminal, se placer dans le répertoire du code et lancer "python main.py".
+S'assurer d'avoir installé toutes les librairies utilisées par le programme.
+
 ### Méthode Méta-Heuristique:
 1. Choisir l'ensemble de villes où l'on va mettre des stations
 2. Recherche locale:
