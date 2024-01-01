@@ -1,11 +1,9 @@
 import numpy as np
 import math
 import random
-import data_analysis as da
 from scipy.optimize import minimize
-from data_analysis import plotTSP
 
-def solve_heuristic(points, number_of_stations, stagnation_threshold=30, nb_children=7, nb_parents=5, last_tsp_iterations=15, save_img=False):
+def solve_heuristic(points, number_of_stations, stagnation_threshold=40, nb_children=7, nb_parents=5, last_tsp_iterations=15):
     print("\nINITIAL CHOOSING OF STATIONS:")
     stations = choose_stations(points, number_of_stations)
     station_points = []
@@ -29,9 +27,6 @@ def solve_heuristic(points, number_of_stations, stagnation_threshold=30, nb_chil
             best_solution = sorted_solutions[0]
             best_solution_age = 0
             print("\tbest value:", solution_value(best_solution), " at iteration ", iter)
-            if save_img:
-                s_p, s_d = best_solution
-                plotTSP([s_p], points, show=False, save=True, plot_name="heuristic_iter"+str(iter))
         else:
             best_solution_age += 1
         solutions = []

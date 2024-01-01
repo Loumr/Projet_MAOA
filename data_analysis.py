@@ -47,9 +47,10 @@ def parse_solution(file_path, points):
 
     return solution
 
+
 # Source:
 # https://gist.github.com/payoung/6087046
-def plotTSP(paths, points, show=True, save=False, plot_name="Solution Métro Circulaire"):
+def plotTSP(paths, points):
     """
     paths: List of lists with the different orders in which the nodes are visited
     points: coordinates for the different nodes
@@ -86,12 +87,7 @@ def plotTSP(paths, points, show=True, save=False, plot_name="Solution Métro Cir
     s_y = 1
     plt.xlim(min(x) - s_x, max(x) + s_x)
     plt.ylim(min(y) - s_y, max(y) + s_y)
-    plt.title = plot_name
-    if save:
-        plt.savefig('outputs/'+plot_name+'.png')
-    if show:
-        plt.show()
-    plt.close()
+    plt.show()
 
 ##################################################
 ##################################################
