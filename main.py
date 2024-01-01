@@ -5,10 +5,12 @@ from gif_maker import *
 
 file = "rd100"
 
+# remove the PNG files, only keep the gif
+delete_all_temp_outputs('outputs')
+
 print("parsing instance...")
 instance = parse_instance("instances/"+file+".tsp")
 print("instance parsed!")
-#solution = parse_solution("instances/"+file+".opt.tour", instance)
 
 heuristic_sol = [] 
 for i in range(1):
@@ -16,10 +18,8 @@ for i in range(1):
 
 print("solution:", evaluate_solution(heuristic_sol[0], instance))
 
-#print("instance =", instance)
-#print("heuristic_sol =", heuristic_sol)
-
 plotTSP(heuristic_sol, instance)
 
 create_gif('outputs', 'heuristic_iter', file+'_heuristic_gif', duration=-1.0)
+
 

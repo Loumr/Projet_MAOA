@@ -5,7 +5,7 @@ import data_analysis as da
 from scipy.optimize import minimize
 from data_analysis import plotTSP
 
-def solve_heuristic(points, number_of_stations, stagnation_threshold=30, nb_children=7, nb_parents=5, last_tsp_iterations=15, save_img=False):
+def solve_heuristic(points, number_of_stations, stagnation_threshold=30, nb_children=7, nb_parents=4, last_tsp_iterations=15, save_img=False):
     print("\nINITIAL CHOOSING OF STATIONS:")
     stations = choose_stations(points, number_of_stations)
     station_points = []
@@ -16,6 +16,7 @@ def solve_heuristic(points, number_of_stations, stagnation_threshold=30, nb_chil
     best_solution = None
     best_solution_age = 0
     iter = 0
+    last_avg = 0.0
     
     print("\nLOCAL SEARCH:")
     while best_solution_age < stagnation_threshold:
@@ -24,16 +25,19 @@ def solve_heuristic(points, number_of_stations, stagnation_threshold=30, nb_chil
         iter += 1
         if iter%10 == 0:
             print("iteration ", iter)
-            check_all_solution_values(sorted_solutions)
+            last_avg = int(check_all_solution_values(sorted_solutions))
         if best_solution == None or solution_value(sorted_solutions[0]) < solution_value(best_solution):
             best_solution = sorted_solutions[0]
             best_solution_age = 0
             print("\tbest value:", solution_value(best_solution), " at iteration ", iter)
-            if save_img:
-                s_p, s_d = best_solution
-                plotTSP([s_p], points, show=False, save=True, plot_name="heuristic_iter"+str(iter))
         else:
             best_solution_age += 1
+        if save_img:
+            s_p, s_d = best_solution
+            last_avg = int(check_all_solution_values(sorted_solutions, False))
+            graph_name = "HEURISTIC iteration["+str(iter)+"]: best = "+str(int(solution_value(best_solution))
+                    )+", average = "+str(last_avg)
+            plotTSP([s_p], points, show=False, save=True, plot_name=graph_name, file_name="heuristic_iter"+str(iter))
         solutions = []
         for i in range(nb_parents):
             if i >= len(sorted_solutions):
@@ -45,36 +49,49 @@ def solve_heuristic(points, number_of_stations, stagnation_threshold=30, nb_chil
     s_path, s_dict = best_solution
     final_solutions = [s_path]
     for i in range(last_tsp_iterations):
-        final_solutions.append(heuristic_TSP(s_path, iterations=50000))
+        final_solutions.append(heuristic_TSP(s_path, iterations=int(5000000/len(points))))
     sorted_final_solutions = rank_solutions(final_solutions, points)
 
     if solution_value(sorted_final_solutions[0]) < solution_value(best_solution):
         best_solution = sorted_final_solutions[0]
     s_path, s_dict = best_solution
     final_val = solution_value(best_solution)
+    if save_img:
+        graph_name = "HEURISTIC iteration["+str(iter)+"]: best = " + str(int(solution_value(best_solution)
+                            )) + ", average = " + str(last_avg)
+        plotTSP([s_path], points, show=False, save=True, plot_name=graph_name, file_name="heuristic_iter99999")
     print("Final best solution [value=" + str(final_val) + "]:", s_dict)
     
     return s_path
 
-def check_all_solution_values(solutions):
+def check_all_solution_values(solutions, display=True):
     value_avg = 0.0
     for s in solutions:
         value_avg += solution_value(s)
     value_avg /= float(len(solutions))
-    print("average of solutions =", value_avg)
+    if display:
+        print("average of solutions =", value_avg)
+    return value_avg
 
-def generate_child_solution(solution_comp, points, number_of_possible_points=10):
+def generate_child_solution(solution_comp, points, number_of_possible_points=10, change_point_proba=0.4):
     solution, sol_dict = solution_comp
-    point_to_replace = random.choice(solution)
-    
-    nearby_points = [point for point in points if point not in solution]
-    distances = [(point, calculate_distance(point_to_replace, point)) for point in nearby_points]
-    
-    sorted_distances = sorted(distances, key=lambda x: x[1])
-    closest_points = [point for point, _ in sorted_distances[:number_of_possible_points]]
-    new_point = random.choice(closest_points)
+    change_point = True
 
-    child_solution = [new_point if point == point_to_replace else point for point in solution]
+    while change_point:
+        point_to_replace = random.choice(solution)
+        
+        nearby_points = [point for point in points if point not in solution]
+        distances = [(point, calculate_distance(point_to_replace, point)) for point in nearby_points]
+        
+        sorted_distances = sorted(distances, key=lambda x: x[1])
+        closest_points = [point for point, _ in sorted_distances[:number_of_possible_points]]
+        new_point = random.choice(closest_points)
+
+        child_solution = [new_point if point == point_to_replace else point for point in solution]
+        change_point = random.random() < change_point_proba
+
+    # it could be interesting to recalculate TSP for every child solution but as it stands it is way too costly
+    #child_solution = heuristic_TSP(child_solution, iterations=int(50000/len(points)))
     return child_solution
 
 def solution_value(item):

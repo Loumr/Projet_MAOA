@@ -2,6 +2,15 @@ import os
 import imageio
 from natsort import natsorted
 
+def delete_all_temp_outputs(directory):
+    for filename in os.listdir(directory):
+        file_path = os.path.join(directory, filename)
+        try:
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+        except Exception as e:
+            print(f"Error deleting {file_path}: {e}")
+
 def create_gif(png_folder, img_prefix, gif_filename, duration=3.0):
     images = []
 
@@ -14,10 +23,10 @@ def create_gif(png_folder, img_prefix, gif_filename, duration=3.0):
             images.append(imageio.imread(file_path))
 
     if duration < 0:
-        duration = len(images) / 24.0
+        duration = len(images) / 12.0
     # Save the images as a GIF
-    imageio.mimsave(gif_filename, images, duration=duration, format='GIF')
+    imageio.mimsave(gif_filename+'.gif', images, duration=duration, format='GIF')
 
 if __name__ == '__main__':
-    create_gif('outputs', 'heuristic_iter', 'heuristic_gif.gif', duration=4.0)
+    create_gif('outputs', 'heuristic_iter', 'heuristic_gif', duration=-1.0)
 
