@@ -3,7 +3,8 @@ import math
 import random
 from scipy.optimize import minimize
 
-def solve_heuristic(points, number_of_stations, iterations=1000, nb_children=5, nb_parents=4):
+def solve_heuristic(points, number_of_stations, stagnation_threshold=40, nb_children=7, nb_parents=5, last_tsp_iterations=15):
+    print("\nINITIAL CHOOSING OF STATIONS:")
     stations = choose_stations(points, number_of_stations)
     station_points = []
     for s in stations:
@@ -11,14 +12,23 @@ def solve_heuristic(points, number_of_stations, iterations=1000, nb_children=5, 
     solutions = []
     solutions.append(heuristic_TSP(station_points))
     best_solution = None
-
-    for iter in range(iterations):
-        if iter%50 == 0:
-            print("iteration ", iter)
+    best_solution_age = 0
+    iter = 0
+    
+    print("\nLOCAL SEARCH:")
+    while best_solution_age < stagnation_threshold:
+        # continue while the best solution keeps changing
         sorted_solutions = rank_solutions(solutions, points)
+        iter += 1
+        if iter%10 == 0:
+            print("iteration ", iter)
+            check_all_solution_values(sorted_solutions)
         if best_solution == None or solution_value(sorted_solutions[0]) < solution_value(best_solution):
             best_solution = sorted_solutions[0]
-            print("best value:", solution_value(best_solution), " at iteration ", iter)
+            best_solution_age = 0
+            print("\tbest value:", solution_value(best_solution), " at iteration ", iter)
+        else:
+            best_solution_age += 1
         solutions = []
         for i in range(nb_parents):
             if i >= len(sorted_solutions):
@@ -26,7 +36,27 @@ def solve_heuristic(points, number_of_stations, iterations=1000, nb_children=5, 
             for j in range(nb_children):
                 solutions.append(generate_child_solution(sorted_solutions[i], points))
     
-    return best_solution
+    print("\nLAST TSP")
+    s_path, s_dict = best_solution
+    final_solutions = [s_path]
+    for i in range(last_tsp_iterations):
+        final_solutions.append(heuristic_TSP(s_path, iterations=50000))
+    sorted_final_solutions = rank_solutions(final_solutions, points)
+
+    if solution_value(sorted_final_solutions[0]) < solution_value(best_solution):
+        best_solution = sorted_final_solutions[0]
+    s_path, s_dict = best_solution
+    final_val = solution_value(best_solution)
+    print("Final best solution [value=" + str(final_val) + "]:", s_dict)
+    
+    return s_path
+
+def check_all_solution_values(solutions):
+    value_avg = 0.0
+    for s in solutions:
+        value_avg += solution_value(s)
+    value_avg /= float(len(solutions))
+    print("average of solutions =", value_avg)
 
 def generate_child_solution(solution_comp, points, number_of_possible_points=10):
     solution, sol_dict = solution_comp
