@@ -21,5 +21,5 @@ print("solution:", evaluate_solution(heuristic_sol[0], instance))
 
 plotTSP(heuristic_sol, instance)
 
-create_gif('outputs', 'heuristic_iter', 'heuristic_gif', duration=-1.0)
+create_gif('outputs', 'heuristic_iter', file+'_heuristic_gif', duration=-1.0)
 
