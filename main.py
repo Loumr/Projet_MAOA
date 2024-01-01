@@ -1,6 +1,7 @@
 from data_analysis import *
 from heuristic import *
 from formulation_compacte import *
+from gif_maker import *
 
 file = "rd100"
 
@@ -11,7 +12,7 @@ print("instance parsed!")
 
 heuristic_sol = [] 
 for i in range(1):
-    heuristic_sol.append(solve_heuristic(instance, int(len(instance)/3)))
+    heuristic_sol.append(solve_heuristic(instance, int(len(instance)/3), save_img=True))
 
 print("solution:", evaluate_solution(heuristic_sol[0], instance))
 
@@ -19,4 +20,6 @@ print("solution:", evaluate_solution(heuristic_sol[0], instance))
 #print("heuristic_sol =", heuristic_sol)
 
 plotTSP(heuristic_sol, instance)
+
+create_gif('outputs', 'heuristic_iter', 'heuristic_gif', duration=-1.0)
 
