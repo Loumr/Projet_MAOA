@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 
 def compare_solutions():
     pass
@@ -24,6 +25,27 @@ def parse_instance(file_path):
                 instance.append(coordinates)
 
     return instance
+
+def parse_instance_numpy_array(file_path):
+    file = open(file_path, 'r')
+    Lines = file.readlines()
+    file.close()
+
+    instance = []
+    
+    reading_points = False
+    for line in Lines:
+        if "NODE_COORD_SECTION" in line:
+            reading_points = True
+        elif reading_points:
+            if "EOF" in line:
+                break
+            parts = line.split()
+            if len(parts) >= 3:
+                coordinates = (float(parts[1]), float(parts[2]))
+                instance.append(coordinates)
+
+    return len(instance), np.array(instance), None
 
 def parse_solution(file_path, points):
     file = open(file_path, 'r')

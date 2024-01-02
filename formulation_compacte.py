@@ -3,6 +3,7 @@ import numpy as np
 import shutil
 import sys
 import os
+from data_analysis import *
 
 # Get data from TSP file
 def read_tsplib_file(file_path):
@@ -51,7 +52,10 @@ def model_pmed(p, file_path):
     Output: Gurobi model to be optimized.
     '''
     # Get data
-    n, cities_coord, cities = read_tsplib_file(file_path)
+    
+    ####### OLD VERSION
+    ####### n, cities_coord, cities = read_tsplib_file(file_path)
+    n, cities_coord, cities = parse_instance_numpy_array(file_path)
 
     # Create a new Gurobi model
     model_pmedian = Model()
