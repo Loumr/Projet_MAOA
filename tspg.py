@@ -4,6 +4,7 @@ import shutil
 import sys
 import os
 from itertools import combinations
+import matplotlib.pyplot as plt
 
 # Get data from TSP file
 def read_tsplib_file(file_path):
@@ -127,6 +128,32 @@ def model_TSPG(clusters, n, cities_coord, cities):
                     n_c += 1
     return m_tspg
 
+def plot_clusters(clusters, cities_coord, show=True, save=False, plot_name="Solution clusters", file_name="clusters"):
+    """
+    clusters: List of lists of coordinates of the stations 
+    cities_coord: numpy array of coordinates for the different nodes
+    """
+    min_x, min_y = np.min(cities_coord[:,0]), np.min(cities_coord[:,1])
+    max_x, max_y = np.max(cities_coord[:,0]), np.max(cities_coord[:,1])
+    for l, cluster in clusters.items():
+        x, y = [], []
+        for pt in cluster:
+            x.append(cities_coord[pt,0])
+            y.append(cities_coord[pt,1])
+        plt.scatter(x, y, marker='o',label=f'Cluster {l}')
+
+    s_x = 1
+    s_y = 1
+    plt.xlim(min_x - s_x, max_x + s_x)
+    plt.ylim(min_y - s_y, max_y + s_y)
+    plt.title(plot_name)
+    if save:
+        plt.tight_layout()
+        plt.savefig('outputs/'+file_name+'.png', bbox_inches='tight')
+    if show:
+        plt.show()
+    plt.close()
+
 def main():
     # Get file and p from command-line arguments
     # Check if correct number of command-line arguments
@@ -158,16 +185,18 @@ def main():
     clusters = {}
     if model_kcluster.status == GRB.OPTIMAL:
         l = -1  # initialize index of cluster
-        for i in range(n):
-            y_ii = model_kcluster.getVarByName(f"y_{i}{i}")
-            if y_ii.getAttr('X'):  # if yii != 0
+        for j in range(n):
+            y_jj = model_kcluster.getVarByName(f"y_{j}{j}")
+            if y_jj.getAttr('X'):  # if yjj != 0
                 l += 1
                 clusters[l] = []
-                for j in range(n):
+                for i in range(n):
                    y_ij = model_kcluster.getVarByName(f"y_{i}{j}") 
                    if y_ij.getAttr('X'):  # if yij != 0
-                       clusters[l].append(j)
+                       clusters[l].append(i)
 
+    plot_clusters(clusters, cities_coord)
+    '''
     # Create the model for generalized TSP
     m_tspg = model_TSPG(clusters, n, cities_coord, cities)
    
@@ -183,7 +212,7 @@ def main():
                 stations.append(i)
 
     print("stations : \n", stations) 
-
+    '''
 
 if __name__ == "__main__":
     main()
