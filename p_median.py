@@ -3,6 +3,7 @@ import numpy as np
 import shutil
 import sys
 import os
+import matplotlib.pyplot as plt
 
 # Get data from TSP file
 def read_tsplib_file(file_path):
@@ -10,7 +11,7 @@ def read_tsplib_file(file_path):
     Reads a tsp file.
     Returns : num_cities : int (number of cities)
               cities_coord : np.array with each city coordinates
-              cities : dict with keys: index of node in cities_coord, value: value of node
+              cities : dict with keys: index of node in cities_coord, value: value of node (string)
     '''
     with open(file_path, 'r') as file:
         lines = file.readlines()
@@ -35,7 +36,7 @@ def read_tsplib_file(file_path):
             break  # End of coordinates
         city_info = line.split()
         #number, x, y = map(int, city_info[0:3])
-        number = int(city_info[0])
+        number = str(city_info[0])
         x, y = map(float, city_info[1:3])
         cities[i] = number
         cities_coord[i,:] = np.array([x,y])
@@ -77,7 +78,7 @@ def model_pmed(p, file_path):
         for j in range(n):  #  contraintes (3)
             model_pmedian.addConstr(y[i,j] <= y[j,j], f"c_{n*(i+1)+j+1}")
             model_pmedian.addConstr(y[i,j] >= 0, f"c_{n*n + n+1 +j}")
-    return model_pmedian, n, cities
+    return model_pmedian, n, cities, cities_coord
 
 
 def file_modification(content, stations):
@@ -136,7 +137,36 @@ def copy_and_modify_file(source_path, destination_path, modification_function, s
     # Write the modified content back to the file
     with open(destination_path, 'w') as file:
         file.write(modified_content)
+
+
+
+def plot_pmedian(stations, cities_coord, show=True, save=False, plot_name="Solution p-median", file_name="stations"):
+    """
+    stations: List of coordinates of the stations 
+    cities_coord: numpy array of coordinates for the different nodes
+    """
+    x = cities_coord[:,0].tolist()
+    y = cities_coord[:,1].tolist()
     
+    plt.scatter(x, y, color='blue', marker='o')
+
+    s_x, s_y = [], []
+    for s in stations:
+        s_x.append(cities_coord[s,0])
+        s_y.append(cities_coord[s,1])
+    plt.scatter(s_x, s_y, color='red', marker='o')
+
+    s_x = 1
+    s_y = 1
+    plt.xlim(min(x) - s_x, max(x) + s_x)
+    plt.ylim(min(y) - s_y, max(y) + s_y)
+    plt.title(plot_name)
+    if save:
+        plt.tight_layout()
+        plt.savefig('outputs/'+file_name+'.png', bbox_inches='tight')
+    if show:
+        plt.show()
+    plt.close()
 
 
 def main():
@@ -158,23 +188,26 @@ def main():
     destination_path = destination_path + f"/{name}_to_{p}" + ext
 
     # Create the model
-    model_pmedian, n, cities = model_pmed(p, file_path)
+    model_pmedian, n, cities, cities_coord = model_pmed(p, file_path)
 
     # Optimize the model
     model_pmedian.optimize()
 
     # Get the results
     stations = []
+    stations_plot = []
     if model_pmedian.status == GRB.OPTIMAL:
         for i in range(n):
             y_ii = model_pmedian.getVarByName(f"y_{i}{i}")
             print(f"y_{i}", y_ii.x)
             if y_ii.getAttr('X'):
                 stations.append(cities[i])
+                stations_plot.append(i)
 
     # Create new file with the resulting TSP instance
     copy_and_modify_file(file_path, destination_path, file_modification, stations)
     print("stations : \n", stations) 
+    plot_pmedian(stations_plot, cities_coord, show=True, save=False, plot_name="Solution p-median", file_name="stations")
 
 
 if __name__ == "__main__":

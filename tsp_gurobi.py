@@ -4,6 +4,7 @@ import shutil
 import sys
 import os
 from p_median import *
+from data_analysis import *
 
 
 def model_tspMTZ(file_path):
@@ -74,19 +75,22 @@ def main():
     destination_path = destination_path + f"/{name}_to_{p}" + ext
 
     # Create the model
-    model_pmedian, n, cities = model_pmed(p, file_path)
+    model_pmedian, n, cities, cities_coord = model_pmed(p, file_path)
 
     # Optimize the model
     model_pmedian.optimize()
 
     # Get the results
     stations = []
+    stations_plot = []
     if model_pmedian.status == GRB.OPTIMAL:
         for i in range(n):
             y_ii = model_pmedian.getVarByName(f"y_{i}{i}")
             if y_ii.getAttr('X'):
                 stations.append(cities[i])
+                stations_plot.append(i)
 
+    plot_pmedian(stations_plot, cities_coord, show=True, save=False, plot_name="Solution p-median", file_name="stations")
     # Create new file with the resulting TSP instance
     copy_and_modify_file(file_path, destination_path, file_modification, stations)
     #print("stations : \n", stations) 
@@ -98,12 +102,15 @@ def main():
     m_tsp.optimize()
 
     # Get the results
-    tour = {}
+    tour = {}  
     if m_tsp.status == GRB.OPTIMAL:
         for i in range(n2):
             u_i = m_tsp.getVarByName(f"u_{i}")
-            tour[cities2[i]] = u_i.x
-    print(tour)
+            tour[i] = (cities_coord2[i][0], cities_coord2[i][1]), u_i.x
+    print("tour", tour)
+    tour = [tour[k][0] for k in sorted(tour, key=lambda x: tour[x][1])]
+    instance =  parse_instance(file_path)
+    plotTSP([tour], instance, save=True)
 
 if __name__ == "__main__":
     main()
