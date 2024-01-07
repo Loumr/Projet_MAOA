@@ -5,6 +5,7 @@ import sys
 import os
 from p_median import *
 from data_analysis import *
+from heuristic import *
 
 
 def model_tspMTZ(file_path):
@@ -90,10 +91,9 @@ def main():
                 stations.append(cities[i])
                 stations_plot.append(i)
 
-    plot_pmedian(stations_plot, cities_coord, show=True, save=False, plot_name="Solution p-median", file_name="stations")
+    #plot_pmedian(stations_plot, cities_coord, show=True, save=False, plot_name="Solution p-median", file_name="stations")
     # Create new file with the resulting TSP instance
     copy_and_modify_file(file_path, destination_path, file_modification, stations)
-    #print("stations : \n", stations) 
 
     # Apply TSP on chosen stations
     m_tsp, n2, cities_coord2, cities2 = model_tspMTZ(destination_path)
@@ -107,10 +107,11 @@ def main():
         for i in range(n2):
             u_i = m_tsp.getVarByName(f"u_{i}")
             tour[i] = (cities_coord2[i][0], cities_coord2[i][1]), u_i.x
-    print("tour", tour)
     tour = [tour[k][0] for k in sorted(tour, key=lambda x: tour[x][1])]
     instance =  parse_instance(file_path)
-    plotTSP([tour], instance, save=True)
+    plotTSP([tour], instance, save=True, file_name=f"metro_circ_gurobi_{name}_{p}")
+    evaluation = evaluate_solution(tour, instance)
+    print(evaluation)
 
 if __name__ == "__main__":
     main()

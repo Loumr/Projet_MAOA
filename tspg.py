@@ -5,46 +5,11 @@ import sys
 import os
 from itertools import combinations
 import matplotlib.pyplot as plt
-
-# Get data from TSP file
-def read_tsplib_file(file_path):
-    '''
-    Reads a tsp file.
-    Returns : num_cities : int (number of cities)
-              cities_coord : np.array with each city coordinates
-              cities : dict with keys: index of node in cities_coord, value: value of node
-    '''
-    with open(file_path, 'r') as file:
-        lines = file.readlines()
-
-    # Parse relevant information
-    for line in lines:
-        if line.startswith("DIMENSION"):
-            num_cities = int(line.split(":")[1].strip())
-        '''
-        elif line.startswith("NODE_COORD_SECTION"):
-            break  # Start reading coordinates
-        '''
-    # Parse city coordinates
-    cities_coord = np.zeros((num_cities,2))
-    cities = {}
-    for i, line in enumerate(lines):
-        if line.strip().startswith("NODE_COORD_SECTION"):
-            index = i
-            break
-    for i, line in enumerate(lines[index + 1:]):
-        #if line.startswith("EOF"):
-        if line.strip() == "EOF":
-            break  # End of coordinates
-        city_info = line.split()
-        number = int(city_info[0])
-        x, y = map(float, city_info[1:3])
-        cities[i] = number
-        cities_coord[i,:] = np.array([x,y])
-        i += 1 
-
-    return num_cities, cities_coord, cities
-
+from data_analysis import *
+from p_median import *
+from tsp_gurobi import model_tspMTZ
+from heuristic import *
+from dbscan import *
 
 def model_kcl(k, n, cities_coord, cities):
     '''
@@ -81,12 +46,90 @@ def model_kcl(k, n, cities_coord, cities):
             model_kcluster.addConstr(y[i,j] >= 0, f"c_{n*n + n+1 +j}")
     return model_kcluster
 
+def heur_med(k, n, cities_coord):
+    dist = np.linalg.norm(cities_coord[:, np.newaxis, :] - cities_coord, axis=2)
+    medians = np.zeros(n)
+    dist_med = np.ones(n)*np.inf
+    mean_dist = np.mean(dist, axis=1)
+    print("shape", np.shape(mean_dist))
+    idx = np.argmax(mean_dist)
+    medians[idx] = 1
+    for i in range(n):
+            dist_med[i] = np.minimum(dist_med[i], dist[idx, i])
+
+    for i in range(k-1):
+        idx = np.argmax(dist_med)
+        medians[idx] = 1
+        for i in range(n):
+            dist_med[i] = np.minimum(dist_med[i], dist[idx, i])
+    return medians
+
+def model_med(k, n, cities_coord, cities):
+    '''
+    Defines model in Gurobi for the k-clustering problem. Here, we choose clusters by choosing clusters' "medians" which are as 
+     far from each other as possible and attributing other points to the cluster in which the nearest median is in.
+    -------------
+    Input: k: int number of clusters
+           n : int (number of cities)
+           cities_coord : np.array with each city coordinates
+           cities : dict with keys: index of node in cities_coord, value: value of node
+    Output: Gurobi model to be optimized.
+    '''
+    # Create a new Gurobi model
+    model_med = Model()
+
+    # Create an array of the distances between points
+    dist = np.linalg.norm(cities_coord[:, np.newaxis, :] - cities_coord, axis=2)
+    
+
+    # Create variables
+    x = np.empty(n, dtype=Var)
+    for i in range(n):
+        x[i] = model_med.addVar(vtype=GRB.BINARY, name=f"x_{i}")
+
+    # Set objective function
+    #model_kcluster.setObjective(quicksum(dist[i,j] * y[i,j] for i in range(n) for j in range(n)), sense=GRB.MINIMIZE)
+    model_med.setObjective(quicksum(dist[i,j] * x[i] * x[j] for i in range(n) for j in range(n)), sense=GRB.MAXIMIZE)
+
+    # Add constraints
+    model_med.addConstr(quicksum(x[i] for i in range(n)) == k)
+
+    return model_med
+
+def model_kcl2(medians, n, cities_coord, cities):
+    '''
+    Defines model in Gurobi for the k-clustering problem. Here, we choose clusters by choosing clusters' "medians" which are as 
+     far from each other as possible and attributing other points to the cluster in which the nearest median is in.
+    -------------
+    Input: k: int number of clusters
+           n : int (number of cities)
+           cities_coord : np.array with each city coordinates
+           cities : dict with keys: index of node in cities_coord, value: value of node
+    Output: Gurobi model to be optimized.
+    '''
+    # Create a new Gurobi model
+    m = Model()
+    # Create an array of the distances between points
+    dist = np.linalg.norm(cities_coord[:, np.newaxis, :] - cities_coord, axis=2)
+    y = np.empty((n,n), dtype=Var) 
+    for i in range(n):
+        for j in range(n):
+            y[i,j] = m.addVar(vtype=GRB.INTEGER, name=f"y_{i}{j}")
+    m.setObjective(quicksum(dist[i,j] * y[i,j] for i in range(n) for j in range(n)), sense=GRB.MINIMIZE)
+    for i in range(n):
+        m.addConstr(y[i,i] == medians[i]) 
+        m.addConstr(np.sum(y[i,:]) == 1)  # contraintes (2)
+        for j in range(n):  #  contraintes (3)
+            m.addConstr(y[i,j] <= y[j,j])
+            m.addConstr(y[i,j] >= 0)
+    return m
+
 
 def model_TSPG(clusters, n, cities_coord, cities):
     '''
     Defines model in Gurobi for the TSPG problem.
     -------------
-    Input: clusters: dict: key: index of cluster ; value: list of points in that cluster
+    Input: clusters: dict: key: index of cluster ; value: list of points in that cluster (indices of points in cities_coord array)
            n : int (number of cities)
            cities_coord : np.array with each city coordinates
            cities : dict with keys: index of node in cities_coord, value: value of node
@@ -99,7 +142,9 @@ def model_TSPG(clusters, n, cities_coord, cities):
     dist = np.linalg.norm(cities_coord[:, np.newaxis, :] - cities_coord, axis=2)
 
     # Create variables
+    # x[i,j]=1 if edge(i,j) chosen, else x[i,j]=0
     x = np.empty((n,n), dtype=Var)  # initialize array of binary variables
+    # y[i]=1 if node i visited, else y[i]=0
     y = np.empty(n, dtype=Var)
     for i in range(n):
         y[i] = m_tspg.addVar(vtype=GRB.BINARY, name=f"y_{i}")
@@ -113,11 +158,12 @@ def model_TSPG(clusters, n, cities_coord, cities):
     for i in range(n):
         m_tspg.addConstr(np.sum(x[i,:]) - x[i,i] == 2*y[i], f"c_{i}")  # contraintes (1.2)
     for h in clusters.keys():
-        m_tspg.addConstr(quicksum(y[i] for i in clusters[h]) >= 1, f"c_{n+h}")  # contraintes (1.3)
+        m_tspg.addConstr(quicksum(y[i] for i in clusters[h]) == 1, f"c_{n+h}")  # contraintes (1.3)
     # Generate all subsets of points of size >=2 and <=n-2
     k = len(clusters)
     n_c = n+k
     for subset_size in range(2,n-2):
+        print(subset_size)
         sub = combinations(set(np.arange(n)), subset_size)
         for s in sub:
             ns = set(np.arange(n)) - set(s) # complémentaire de s
@@ -176,11 +222,25 @@ def main():
     n, cities_coord, cities = read_tsplib_file(file_path)
 
     # Create the model for k_clustering
-    model_kcluster = model_kcl(p, n, cities_coord, cities)
-
+    '''
+    m = model_med(p, n, cities_coord, cities)
     # Optimize the model
-    model_kcluster.optimize()
+    m.optimize()
+    med = np.empty(n)
+    medians = []
+    if m.status == GRB.OPTIMAL:
+        for i in range(n):
+            x_i = m.getVarByName(f"x_{i}")
+            med[i] = x_i.x
+            if x_i.x == 1:
+                medians.append(i)
+    '''
+    '''
+    medians = heur_med(p, n, cities_coord)
+    #plot_pmedian(medians, cities_coord, save=True, file_name=f'med_{name}_{p}')
 
+    model_kcluster = model_kcl2(medians, n, cities_coord, cities)
+    model_kcluster.optimize()
     # Get the results
     clusters = {}
     if model_kcluster.status == GRB.OPTIMAL:
@@ -193,9 +253,51 @@ def main():
                 for i in range(n):
                    y_ij = model_kcluster.getVarByName(f"y_{i}{j}") 
                    if y_ij.getAttr('X'):  # if yij != 0
-                       clusters[l].append(i)
+                       clusters[l].append(i)    # each cluster is a list of indices of points in the coord_cities array
+    #plot_clusters(clusters, cities_coord, save=True, file_name=f'clusters_{name}_{p}')  
+    '''
+    clusters, p = dbscan(cities_coord)
+    print("clusters")
+    print(type(clusters))
+    print(clusters)
+    m_med, n, cities, cities_coord = model_pmed(p, file_path, clusters=clusters)
 
-    plot_clusters(clusters, cities_coord)
+    # Optimize the model
+    m_med.optimize()
+
+    # Get the results
+    stations = []
+    stations_plot = []
+    if m_med.status == GRB.OPTIMAL:
+        for i in range(n):
+            y_ii = m_med.getVarByName(f"y_{i}{i}")
+            if y_ii.getAttr('X'):
+                stations.append(cities[i])
+                stations_plot.append(i)
+
+    #plot_pmedian(stations_plot, cities_coord, show=True, save=False, plot_name="Solution p-median", file_name="stations")
+    # Create new file with the resulting TSP instance
+    copy_and_modify_file(file_path, destination_path, file_modification, stations)
+
+    # Apply TSP on chosen stations
+    m_tsp, n2, cities_coord2, cities2 = model_tspMTZ(destination_path)
+
+    # Optimize the model
+    m_tsp.optimize()
+
+    # Get the results
+    tour = {}  
+    if m_tsp.status == GRB.OPTIMAL:
+        for i in range(n2):
+            u_i = m_tsp.getVarByName(f"u_{i}")
+            tour[i] = (cities_coord2[i][0], cities_coord2[i][1]), u_i.x
+    tour = [tour[k][0] for k in sorted(tour, key=lambda x: tour[x][1])]
+    instance =  parse_instance(file_path)
+    plotTSP([tour], instance, save=True, file_name=f"metro_circ_gurobi_{name}_{p}", clusters=clusters)
+    evaluation = evaluate_solution(tour, instance)
+    print(evaluation)
+    
+    
     '''
     # Create the model for generalized TSP
     m_tspg = model_TSPG(clusters, n, cities_coord, cities)
@@ -205,14 +307,20 @@ def main():
 
     # Get the results
     stations = []
+    tour = []
     if m_tspg.status == GRB.OPTIMAL:
         for i in range(n):
             y_i = m_tspg.getVarByName(f"y_{i}")
             if y_i.getAttr('X'):  # if yii != 0
                 stations.append(i)
-
+                for j in range(n):
+                    x_ij = m_tspg.getVarByName(f"x_{i}{j}")
+                    if x_ij.x == 1:
+                        tour.append([cities_coord[i], cities_coord[j]])
     print("stations : \n", stations) 
+    instance =  parse_instance(file_path)
+    plotTSP([tour], instance, show=True, save=False, plot_name="Solution Métro Circulaire", file_name=f"tspg_{name}_{p}", mode="edges")
     '''
-
+    
 if __name__ == "__main__":
     main()

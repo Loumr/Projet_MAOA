@@ -45,7 +45,7 @@ def read_tsplib_file(file_path):
     return num_cities, cities_coord, cities
 
 
-def model_pmed(p, file_path):
+def model_pmed(p, file_path, clusters=None):
     '''
     Defines model in Gurobi for the p-median problem.
     -------------
@@ -72,12 +72,15 @@ def model_pmed(p, file_path):
     model_pmedian.setObjective(quicksum(dist[i,j] * y[i,j] for i in range(n) for j in range(n)), sense=GRB.MINIMIZE)
 
     # Add constraints
-    model_pmedian.addConstr(np.trace(y) == p, "c0")  # contrainte (1)
+    model_pmedian.addConstr(np.trace(y) == p)  # contrainte (1)
     for i in range(n):
-        model_pmedian.addConstr(np.sum(y[i,:]) == 1, f"c_{i+1}")  # contraintes (2)
+        model_pmedian.addConstr(np.sum(y[i,:]) == 1)  # contraintes (2)
         for j in range(n):  #  contraintes (3)
-            model_pmedian.addConstr(y[i,j] <= y[j,j], f"c_{n*(i+1)+j+1}")
-            model_pmedian.addConstr(y[i,j] >= 0, f"c_{n*n + n+1 +j}")
+            model_pmedian.addConstr(y[i,j] <= y[j,j])
+            model_pmedian.addConstr(y[i,j] >= 0)
+    if clusters != None:
+        for h in clusters.keys():
+            model_pmedian.addConstr(quicksum(y[i,i] for i in clusters[h]) == 1)
     return model_pmedian, n, cities, cities_coord
 
 
@@ -142,7 +145,7 @@ def copy_and_modify_file(source_path, destination_path, modification_function, s
 
 def plot_pmedian(stations, cities_coord, show=True, save=False, plot_name="Solution p-median", file_name="stations"):
     """
-    stations: List of coordinates of the stations 
+    stations: List of indices of the stations 
     cities_coord: numpy array of coordinates for the different nodes
     """
     x = cities_coord[:,0].tolist()
@@ -152,6 +155,7 @@ def plot_pmedian(stations, cities_coord, show=True, save=False, plot_name="Solut
 
     s_x, s_y = [], []
     for s in stations:
+        s = int(s)
         s_x.append(cities_coord[s,0])
         s_y.append(cities_coord[s,1])
     plt.scatter(s_x, s_y, color='red', marker='o')
