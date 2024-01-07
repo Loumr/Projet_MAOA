@@ -1,8 +1,6 @@
 import numpy as np
 import math
 import random
-import data_analysis as da
-from scipy.optimize import minimize
 from data_analysis import plotTSP
 
 def solve_heuristic(points, number_of_stations, stagnation_threshold=30, nb_children=7, nb_parents=4, last_tsp_iterations=15, save_img=False):
