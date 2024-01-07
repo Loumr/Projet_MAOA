@@ -1,4 +1,5 @@
 from PIL import Image
+import os
 
 def gif_to_png(gif_path, output_folder):
     # Open the GIF file
@@ -18,13 +19,12 @@ def gif_to_png(gif_path, output_folder):
 
 if __name__ == "__main__":
     # Specify the path to the GIF file
-    gif_path = "path/to/your/input.gif"
+    gif_name = "rd100_heuristic_gif_GREAT"
 
-    # Specify the output folder where PNG files will be saved
-    output_folder = "path/to/your/output_folder"
+    gif_path = gif_name + ".gif"
+    output_folder = "C:/Users/33670/Documents/0-Etudes/Uni-M2-Androide/MAOA/animated_results/" + gif_name
 
     # Create the output folder if it doesn't exist
-    import os
     os.makedirs(output_folder, exist_ok=True)
 
     # Call the function to convert the GIF to PNG frames
