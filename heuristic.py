@@ -3,7 +3,7 @@ import math
 import random
 from data_analysis import plotTSP
 
-def solve_heuristic(points, number_of_stations, stagnation_threshold=30, nb_children=7, nb_parents=4, last_tsp_iterations=15, save_img=False):
+def solve_heuristic(points, number_of_stations, stagnation_threshold=50, nb_children=4, nb_parents=32, last_tsp_iterations=15, save_img=False):
     print("\nINITIAL CHOOSING OF STATIONS:")
     stations = choose_stations(points, number_of_stations)
     station_points = []
@@ -71,7 +71,7 @@ def check_all_solution_values(solutions, display=True):
         print("average of solutions =", value_avg)
     return value_avg
 
-def generate_child_solution(solution_comp, points, number_of_possible_points=10, change_point_proba=0.4):
+def generate_child_solution(solution_comp, points, number_of_possible_points=10, change_point_proba=0.7):
     solution, sol_dict = solution_comp
     change_point = True
 
