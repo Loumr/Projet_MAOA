@@ -5,6 +5,56 @@ from data_analysis import plotTSP
 
 STATION_COST = 10000
 
+def calculate_solution_value(solution, points):
+    average_time = 0
+    average_foot_dist = 0.0
+    average_metro_dist = 0.0
+    worst_station_time = 0.0
+    best_station_time = float('inf') 
+
+    solution_index = []
+    for sp in solution:
+        solution_index.append(points.index(sp))
+
+    closest_station = []
+    for p in points:
+        closest, min_dist = find_closest_point(p, solution) # with fucked up indexes
+        #true_closest = solution_index[closest] # with correct indexes
+        closest_station.append((closest, min_dist))
+    forward, backward = calculate_total_metro_dist(solution) # with fucked up indexes still
+
+    for p1 in range(len(points)):
+        station_metro_time = 0.0
+        station_foot_time = 0.0
+        station_time = 0.0
+        for p2 in range(len(points)):
+            if p1 != p2:
+                closest_p1, dist_p1 = closest_station[p1]
+                closest_p2, dist_p2 = closest_station[p2]
+                on_foot = dist_p1 + dist_p2
+                in_metro = distance_between_stations(closest_p1, closest_p2, forward, backward)
+                station_time += on_foot*10 + in_metro
+                station_metro_time += in_metro
+                station_foot_time += on_foot
+        station_time /= float(len(points))
+        average_time += station_time
+        average_foot_dist += station_foot_time / float(len(points))
+        average_metro_dist += station_metro_time / float(len(points))
+        if p1 in solution_index:
+            if (average_time > worst_station_time):
+                worst_station_time = average_time
+                worst_station = p1
+            if (average_time < best_station_time):
+                best_station_time = average_time
+                best_station = p1
+
+    average_metro_dist /= float(len(points))
+    average_foot_dist /= float(len(points))
+    average_time /= float(len(points))
+    foot_metro_ratio = ((average_foot_dist*10.0) / average_metro_dist)*len(solution)
+    return (average_time + foot_metro_ratio + calculate_metro_cost(solution))
+
+
 def solve_heuristic(points, number_of_stations, stagnation_threshold=40, nb_children=4, nb_parents=24, last_tsp_iterations=15, save_img=False):
     print("\nINITIAL CHOOSING OF STATIONS:")
     stations = choose_stations(points, number_of_stations)
