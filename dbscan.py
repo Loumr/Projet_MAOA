@@ -11,7 +11,7 @@ from sklearn.cluster import DBSCAN
 import numpy as np
 import matplotlib.pyplot as plt
 
-def dbscan(cities_coord, eps=110, min_samples=3):
+def dbscan(cities_coord, eps=80, min_samples=2):
     # Applying DBSCAN
     dbscan = DBSCAN(eps=eps, min_samples=min_samples)
     labels = dbscan.fit_predict(cities_coord)

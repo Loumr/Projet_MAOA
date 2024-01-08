@@ -110,8 +110,9 @@ def main():
     tour = [tour[k][0] for k in sorted(tour, key=lambda x: tour[x][1])]
     instance =  parse_instance(file_path)
     plotTSP([tour], instance, save=True, file_name=f"metro_circ_gurobi_{name}_{p}")
-    evaluation = evaluate_solution(tour, instance)
-    print(evaluation)
+    #evaluation = evaluate_solution(tour, instance)
+    solution_val = calculate_solution_value(tour, instance)
+    print(solution_val)
 
 if __name__ == "__main__":
     main()

@@ -51,7 +51,6 @@ def heur_med(k, n, cities_coord):
     medians = np.zeros(n)
     dist_med = np.ones(n)*np.inf
     mean_dist = np.mean(dist, axis=1)
-    print("shape", np.shape(mean_dist))
     idx = np.argmax(mean_dist)
     medians[idx] = 1
     for i in range(n):
@@ -98,7 +97,7 @@ def model_med(k, n, cities_coord, cities):
 
 def model_kcl2(medians, n, cities_coord, cities):
     '''
-    Defines model in Gurobi for the k-clustering problem. Here, we choose clusters by choosing clusters' "medians" which are as 
+    Defines model in Gurobi for the k-clustering problem. Here, we choose clusters according to clusters' "medians" which are as 
      far from each other as possible and attributing other points to the cluster in which the nearest median is in.
     -------------
     Input: k: int number of clusters
@@ -203,12 +202,13 @@ def plot_clusters(clusters, cities_coord, show=True, save=False, plot_name="Solu
 def main():
     # Get file and p from command-line arguments
     # Check if correct number of command-line arguments
-    if len(sys.argv) != 3:
-        print("Usage: python script.py file_path k")
+    if len(sys.argv) != 4:
+        print("Usage: python script.py file_path cluster_method k")
         sys.exit(1)
 
     file_path = sys.argv[1]
-    p = int(sys.argv[2])
+    p = int(sys.argv[3])
+    cluster_method = sys.argv[2]
 
     # Create destination path
     l = os.path.basename(file_path).split('.')
@@ -222,44 +222,45 @@ def main():
     n, cities_coord, cities = read_tsplib_file(file_path)
 
     # Create the model for k_clustering
-    '''
-    m = model_med(p, n, cities_coord, cities)
-    # Optimize the model
-    m.optimize()
-    med = np.empty(n)
-    medians = []
-    if m.status == GRB.OPTIMAL:
-        for i in range(n):
-            x_i = m.getVarByName(f"x_{i}")
-            med[i] = x_i.x
-            if x_i.x == 1:
-                medians.append(i)
-    '''
-    '''
-    medians = heur_med(p, n, cities_coord)
-    #plot_pmedian(medians, cities_coord, save=True, file_name=f'med_{name}_{p}')
-
-    model_kcluster = model_kcl2(medians, n, cities_coord, cities)
-    model_kcluster.optimize()
-    # Get the results
-    clusters = {}
-    if model_kcluster.status == GRB.OPTIMAL:
-        l = -1  # initialize index of cluster
-        for j in range(n):
-            y_jj = model_kcluster.getVarByName(f"y_{j}{j}")
-            if y_jj.getAttr('X'):  # if yjj != 0
-                l += 1
-                clusters[l] = []
+    if cluster_method == 'p_median' or cluster_method == 'eloignes':
+        if cluster_method == 'p_median':
+            m = model_med(p, n, cities_coord, cities)
+            # Optimize the model
+            m.optimize()
+            medians = np.empty(n)
+            med = []
+            if m.status == GRB.OPTIMAL:
                 for i in range(n):
-                   y_ij = model_kcluster.getVarByName(f"y_{i}{j}") 
-                   if y_ij.getAttr('X'):  # if yij != 0
-                       clusters[l].append(i)    # each cluster is a list of indices of points in the coord_cities array
+                    x_i = m.getVarByName(f"x_{i}")
+                    medians[i] = x_i.x
+                    if x_i.x == 1:
+                        med.append(i)
+
+        #medians = heur_med(p, n, cities_coord)
+        #plot_pmedian(medians, cities_coord, save=True, file_name=f'med_{name}_{p}')
+        elif cluster_method == 'eloignes':
+            medians = heur_med(p, n, cities_coord)
+        model_kcluster = model_kcl2(medians, n, cities_coord, cities)
+        model_kcluster.optimize()
+
+        # Get the results
+        clusters = {}
+        if model_kcluster.status == GRB.OPTIMAL:
+            l = -1  # initialize index of cluster
+            for j in range(n):
+                y_jj = model_kcluster.getVarByName(f"y_{j}{j}")
+                if y_jj.getAttr('X'):  # if yjj != 0
+                    l += 1
+                    clusters[l] = []
+                    for i in range(n):
+                        y_ij = model_kcluster.getVarByName(f"y_{i}{j}") 
+                        if y_ij.getAttr('X'):  # if yij != 0
+                            clusters[l].append(i)    # each cluster is a list of indices of points in the coord_cities array
     #plot_clusters(clusters, cities_coord, save=True, file_name=f'clusters_{name}_{p}')  
-    '''
-    clusters, p = dbscan(cities_coord)
-    print("clusters")
-    print(type(clusters))
-    print(clusters)
+    elif cluster_method == 'dbscan':
+        clusters, p = dbscan(cities_coord)
+        print("clusters", p)
+
     m_med, n, cities, cities_coord = model_pmed(p, file_path, clusters=clusters)
 
     # Optimize the model
@@ -294,8 +295,8 @@ def main():
     tour = [tour[k][0] for k in sorted(tour, key=lambda x: tour[x][1])]
     instance =  parse_instance(file_path)
     plotTSP([tour], instance, save=True, file_name=f"metro_circ_gurobi_{name}_{p}", clusters=clusters)
-    evaluation = evaluate_solution(tour, instance)
-    print(evaluation)
+    solution_val = calculate_solution_value(tour, instance)
+    print(solution_val)
     
     
     '''
