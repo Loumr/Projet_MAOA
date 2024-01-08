@@ -21,7 +21,7 @@ S'assurer d'avoir installé toutes les librairies utilisées par le programme.
 
 #### Exemples:
 On peut voir ici l'exécution de l'algorithme méta-heuristique sur l'instance rd100:
-![](https://github.com/Projet_MAOA/rd100_heuristic_gif_GREAT.gif)
+<img src="rd100_heuristic_gif_GREAT.gif">
 
 ### Méthode exacte (formulation compacte ou non-compacte)
 1. Choisir l'ensemble de villes où l'on va mettre des stations
