@@ -33,9 +33,8 @@ S'assurer d'avoir installé toutes les librairies utilisées par le programme.
 <br />
 <br />
 
-+ visualisation de chaque point à chaque itération pour la méta heuristique
 
-### A FAIRE
+### Elements
 - ALGO GENERAL
 &ensp;Choix des villes<br />
 &ensp;Itération  => uniquement pour la méta heuristique<br />
@@ -53,6 +52,7 @@ S'assurer d'avoir installé toutes les librairies utilisées par le programme.
 &ensp;voyageur de commerce avancé => résolution exacte (Gurobi/CPlex)
 - Formulation compact
 - Formulation non-compacte
+- Visualisation de chaque point à chaque itération pour la méta heuristique
 - Mini-rapport + Analyse critique
 
 TSP => projet Concorde<br />
@@ -80,20 +80,3 @@ L'évalutation d'une solution se fait en n².
 - Formulation PLNE non compacte => P-Median (cluster) puis TSP Généralisé
 
 > PL Formulation non compacte = nombre exponentiel de contraintes et de variables
-
-## TO-DO LIST
-
-### Fait
-
-### En cours
-- Lou : Formulation Compacte (P Median + TSP Concorde) => méthodes exactes
-- Maxence : Visualisation des données <br />
-
-### A faire
-- Comparaison des résultats (temps de calcul, complexité, qualité des solutions)
-- Récupérer l'évaluation du prof (temps de trajets moyens)
-- Tester automatiquement sur des instances
-- Heuristique
-- Méta-Heuristique
-- Formulation non compacte (k-partition + TSP Généralisé) => méthodes exactes
-- Mini-rapport (3 pages)
