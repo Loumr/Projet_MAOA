@@ -11,7 +11,7 @@ def delete_all_temp_outputs(directory):
         except Exception as e:
             print(f"Error deleting {file_path}: {e}")
 
-def create_gif(png_folder, img_prefix, gif_filename, duration=3.0):
+def create_gif(png_folder, img_prefix, gif_filename, time=-3.0):
     images = []
 
     # Assuming the PNG files are named in sequential order (e.g., frame1.png, frame2.png, ...)
@@ -22,11 +22,11 @@ def create_gif(png_folder, img_prefix, gif_filename, duration=3.0):
             file_path = os.path.join(png_folder, png_file)
             images.append(imageio.imread(file_path))
 
-    if duration < 0:
-        duration = len(images) / 12.0
+    if time < 0:
+        time = float(len(images)) / 12.0
     # Save the images as a GIF
-    imageio.mimsave(gif_filename+'.gif', images, duration=duration, format='GIF')
+    imageio.mimsave(gif_filename+'.gif', images, duration=time, format='GIF')
 
 if __name__ == '__main__':
-    create_gif('outputs', 'heuristic_iter', 'heuristic_gif', duration=-1.0)
+    create_gif('outputs', 'heuristic_iter', 'heuristic_gif', time=-1.0)
 
