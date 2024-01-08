@@ -3,7 +3,9 @@ import math
 import random
 from data_analysis import plotTSP
 
-def solve_heuristic(points, number_of_stations, stagnation_threshold=50, nb_children=4, nb_parents=32, last_tsp_iterations=15, save_img=False):
+STATION_COST = 10000
+
+def solve_heuristic(points, number_of_stations, stagnation_threshold=40, nb_children=8, nb_parents=64, last_tsp_iterations=15, save_img=False):
     print("\nINITIAL CHOOSING OF STATIONS:")
     stations = choose_stations(points, number_of_stations)
     station_points = []
@@ -95,8 +97,14 @@ def generate_child_solution(solution_comp, points, number_of_possible_points=10,
 def solution_value(item):
     solution, s_dict = item
     avg_time = s_dict["average_time"]
-    foot_metro_ratio = s_dict["average_metro_dist"] / (s_dict["average_foot_dist"]*10.0)
-    return (avg_time + foot_metro_ratio * 1000.0)
+    foot_metro_ratio = (s_dict["average_metro_dist"] / (s_dict["average_foot_dist"]*10.0))*len(solution)
+    return (avg_time + foot_metro_ratio + calculate_metro_cost(solution))
+
+def calculate_metro_cost(solution):
+    distance = calculate_distance(solution[len(solution) - 1], solution[0])
+    for i in range(len(solution) - 1):
+        distance += calculate_distance(solution[i], solution[i+1])
+    return distance * 10 + len(solution) * STATION_COST
 
 def rank_solutions(solutions, points):
     solution_dicts = []
