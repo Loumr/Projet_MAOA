@@ -20,8 +20,11 @@ S'assurer d'avoir installé toutes les librairies utilisées par le programme.
 3. Voyageur de commerce poussé pour trouver une bonne solution
 
 #### Exemples:
-On peut voir ici l'exécution de l'algorithme méta-heuristique sur l'instance rd100:
+##### Fonctionnement correct (bons résultats):
 <img src="rd100_heuristic_gif_GREAT.gif">
+
+##### Mauvais fonctionnement (bloqué sur maximum local):
+<img src="rd100_heuristic_gif_MAX_LOC.gif">
 
 ### Méthode exacte (formulation compacte ou non-compacte)
 1. Choisir l'ensemble de villes où l'on va mettre des stations
