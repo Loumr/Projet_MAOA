@@ -55,7 +55,7 @@ def calculate_solution_value(solution, points):
     return (average_time + foot_metro_ratio + calculate_metro_cost(solution))
 
 
-def solve_heuristic(points, number_of_stations, stagnation_threshold=40, nb_children=4, nb_parents=24, last_tsp_iterations=15, save_img=False):
+def solve_heuristic(points, number_of_stations, stagnation_threshold=30, nb_children=4, nb_parents=28, last_tsp_iterations=15, save_img=False):
     print("\nINITIAL CHOOSING OF STATIONS:")
     stations = choose_stations(points, number_of_stations)
     station_points = []
@@ -111,6 +111,7 @@ def solve_heuristic(points, number_of_stations, stagnation_threshold=40, nb_chil
                             )) + ", average = " + str(last_avg)
         plotTSP([s_path], points, show=False, save=True, plot_name=graph_name, file_name="heuristic_iter99999")
     print("Final best solution [value=" + str(final_val) + "]:", s_dict)
+    print("cost = ", calculate_metro_cost(s_path))
     
     return s_path
 
